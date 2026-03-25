@@ -1964,7 +1964,7 @@ function showPage(name, btn) {
   if(btn) btn.classList.add('active');
   if(name==='dashboard') { renderDashboard(); renderCalendar(); }
   if(name==='clientes') { populateYearFilter(); renderClients(); }
-  if(name==='finanzas') { financeMonthFilter = null; renderFinanzas(); }
+  if(name==='finanzas') { financePeriod={type:'month',from:getPeriodRange('month').from,to:getPeriodRange('month').to}; financeMonthFilter=null; renderFinanzas(); }
   if(name==='paquetes') renderPaquetes();
   if(name==='catalogo') renderCatalog();
   if(name==='notas')    renderNotes();
