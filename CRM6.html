@@ -181,6 +181,57 @@
 
   /* FINANCE */
   .finance-grid { display:grid; grid-template-columns:1.5fr 1fr; gap:16px; }
+  /* FINANCE PERIOD FILTER */
+  .finance-period-bar {
+    display:flex; align-items:center; flex-wrap:wrap; gap:8px;
+    margin-bottom:18px; padding:14px 16px;
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+  }
+  .period-chip {
+    padding:6px 14px; border-radius:20px; border:1px solid var(--border);
+    background:none; color:var(--text-muted); cursor:pointer;
+    font-family:'DM Sans',sans-serif; font-size:12px; transition:all 0.15s; white-space:nowrap;
+  }
+  .period-chip:hover { border-color:var(--gold); color:var(--gold); }
+  .period-chip.active { background:var(--gold); color:#0d0d0d; border-color:var(--gold); font-weight:500; }
+  .period-separator { width:1px; height:20px; background:var(--border); flex-shrink:0; }
+  .period-date-input {
+    background:var(--surface2); border:1px solid var(--border); border-radius:8px;
+    padding:5px 10px; color:var(--text); font-family:'DM Sans',sans-serif; font-size:12px;
+    outline:none; cursor:pointer;
+  }
+  .period-date-input:focus { border-color:var(--gold); }
+  .period-clear-btn {
+    margin-left:auto; padding:6px 14px; border-radius:20px;
+    background:none; border:1px solid var(--border);
+    color:var(--text-muted); cursor:pointer; font-family:'DM Sans',sans-serif; font-size:12px;
+    transition:all 0.15s; white-space:nowrap;
+  }
+  .period-clear-btn:hover { border-color:var(--red); color:var(--red); }
+
+  /* AREA CHART */
+  .area-chart-wrap {
+    width:100%; overflow-x:auto; margin-top:8px;
+  }
+  .area-chart-wrap svg { display:block; width:100%; min-width:280px; }
+  .area-chart-year-row {
+    display:flex; align-items:center; gap:8px; margin-bottom:10px; flex-wrap:wrap;
+  }
+  .chart-year-btn {
+    padding:4px 12px; border-radius:16px; border:1px solid var(--border);
+    background:none; color:var(--text-muted); cursor:pointer;
+    font-family:'DM Sans',sans-serif; font-size:11px; transition:all 0.15s;
+  }
+  .chart-year-btn:hover { border-color:var(--gold); color:var(--gold); }
+  .chart-year-btn.active { background:var(--gold-dim); border-color:var(--gold); color:var(--gold); font-weight:500; }
+  .chart-year-label { font-size:11px; color:var(--text-muted); margin-right:4px; }
+
+  @media (max-width:768px) {
+    .finance-period-bar { gap:6px; padding:10px 12px; }
+    .period-chip { font-size:11px; padding:5px 10px; }
+    .period-separator { display:none; }
+    .period-clear-btn { margin-left:0; width:100%; text-align:center; }
+  }
   .payment-row { display:flex; align-items:center; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--border); }
   .payment-row:last-child { border-bottom:none; }
   .payment-client { font-size:13px; color:var(--text); }
@@ -1078,8 +1129,45 @@
         <div class="page-subtitle">Resumen de ingresos y pagos</div>
       </div>
     </div>
+    <!-- PERIOD FILTER BAR -->
+    <div class="finance-period-bar" id="finance-period-bar">
+      <button class="period-chip active" id="pchip-month"  onclick="setPeriod('month')">Este mes</button>
+      <button class="period-chip"        id="pchip-quarter" onclick="setPeriod('quarter')">Trimestre</button>
+      <button class="period-chip"        id="pchip-year"   onclick="setPeriod('year')">Este año</button>
+      <button class="period-chip"        id="pchip-all"    onclick="setPeriod('all')">Todo</button>
+      <div class="period-separator"></div>
+      <span style="font-size:12px;color:var(--text-muted);white-space:nowrap">Personalizado:</span>
+      <input type="date" class="period-date-input" id="period-from" onchange="setPeriod('custom')">
+      <span style="font-size:12px;color:var(--text-muted)">—</span>
+      <input type="date" class="period-date-input" id="period-to"   onchange="setPeriod('custom')">
+      <button class="period-clear-btn" onclick="setPeriod('all')">✕ Limpiar filtros</button>
+    </div>
+
     <div class="stats-grid" id="finance-stats"></div>
     <div class="finance-grid">
+      <div class="card" style="grid-column:span 2">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;flex-wrap:wrap;gap:8px">
+          <div class="card-title" style="margin-bottom:0">Estadística de ingresos</div>
+          <div id="finance-filter-badge" style="display:none;align-items:center;gap:8px">
+            <span id="finance-filter-label" style="font-size:11px;color:var(--gold);background:var(--gold-dim);padding:3px 10px;border-radius:20px"></span>
+            <button onclick="clearFinanceBarFilter()" style="font-size:11px;color:var(--text-muted);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;padding:0" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text-muted)'">✕ Ver todos</button>
+          </div>
+        </div>
+        <!-- Year selector for bar chart -->
+        <div class="area-chart-year-row" id="chart-year-row"></div>
+        <!-- Area chart -->
+        <div class="area-chart-wrap" id="area-chart-wrap"></div>
+        <!-- Original mini bar chart -->
+        <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:1.5px">Detalle mensual (clic para filtrar)</div>
+          <div class="mini-chart" id="finance-chart"></div>
+          <div class="months-labels" id="finance-months"></div>
+        </div>
+      </div>
+    </div>
+    <div class="finance-grid" style="margin-top:16px">
+    </div>
+    <div style="margin-top:16px" class="card">
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
           <div class="card-title" style="margin-bottom:0">Ingresos por mes</div>
@@ -2537,20 +2625,289 @@ function deleteClient(id) {
 }
 
 // ───── FINANZAS ─────
-let financeMonthFilter = null; // { month:0-11, year:2026, label:'Abr 2026' }
+let financeMonthFilter = null;
+let financePeriod = { type: 'month', from: null, to: null }; // active period filter
+let financeChartYear = new Date().getFullYear();             // year shown in area chart
+
+// ── Period helpers ──
+function getPeriodRange(type) {
+  const now = new Date(); const y = now.getFullYear(); const m = now.getMonth();
+  if(type === 'month')   return { from: new Date(y, m, 1),   to: new Date(y, m+1, 0) };
+  if(type === 'quarter') {
+    const q = Math.floor(m/3);
+    return { from: new Date(y, q*3, 1), to: new Date(y, q*3+3, 0) };
+  }
+  if(type === 'year')    return { from: new Date(y, 0, 1),   to: new Date(y, 11, 31) };
+  if(type === 'all')     return { from: null, to: null };
+  return null;
+}
+
+function setPeriod(type) {
+  if(type === 'custom') {
+    const f = document.getElementById('period-from').value;
+    const t = document.getElementById('period-to').value;
+    if(!f && !t) { setPeriod('all'); return; }
+    financePeriod = { type:'custom', from: f ? new Date(f+'T00:00:00') : null, to: t ? new Date(t+'T23:59:59') : null };
+  } else {
+    const r = getPeriodRange(type);
+    financePeriod = { type, from: r.from, to: r.to };
+    if(type !== 'custom') {
+      document.getElementById('period-from').value = '';
+      document.getElementById('period-to').value   = '';
+    }
+  }
+  // Update chip active state
+  ['month','quarter','year','all'].forEach(t => {
+    const el = document.getElementById('pchip-'+t);
+    if(el) el.classList.toggle('active', t === type);
+  });
+  financeMonthFilter = null; // reset bar filter when period changes
+  renderFinanzas();
+}
+
+function getPeriodClients() {
+  const { from, to } = financePeriod;
+  if(!from && !to) return clients;
+  return clients.filter(c => {
+    if(!c.date) return false;
+    const d = new Date(c.date + 'T12:00:00');
+    if(from && d < from) return false;
+    if(to   && d > to)   return false;
+    return true;
+  });
+}
 
 function clearFinanceFilter() {
   financeMonthFilter = null;
+  financePeriod = { type:'all', from:null, to:null };
+  document.getElementById('period-from').value = '';
+  document.getElementById('period-to').value   = '';
+  ['month','quarter','year','all'].forEach(t => {
+    const el = document.getElementById('pchip-'+t);
+    if(el) el.classList.toggle('active', t==='all');
+  });
   renderFinanzas();
+}
+
+function clearFinanceBarFilter() {
+  financeMonthFilter = null;
+  renderFinanzasSections();
 }
 
 function selectFinanceBar(m, y, label) {
   if(financeMonthFilter && financeMonthFilter.month === m && financeMonthFilter.year === y) {
-    financeMonthFilter = null; // toggle off
+    financeMonthFilter = null;
   } else {
     financeMonthFilter = { month: m, year: y, label };
   }
-  renderFinanzasSections(); // only re-render chart + sections, not stats
+  renderFinanzasSections();
+}
+
+function getFinanceClients() {
+  const base = getPeriodClients();
+  if(!financeMonthFilter) return base;
+  return base.filter(c => {
+    if(!c.date) return false;
+    const d = new Date(c.date + 'T12:00:00');
+    return d.getMonth() === financeMonthFilter.month && d.getFullYear() === financeMonthFilter.year;
+  });
+}
+
+function renderFinanzas() {
+  const periodClients = getPeriodClients();
+  const total     = periodClients.reduce((s,c)=>s+c.total,0);
+  const paid      = periodClients.reduce((s,c)=>s+c.paid,0);
+  const pending   = total - paid;
+  const completed = periodClients.filter(c=>c.paid===c.total).length;
+
+  const now = new Date();
+  const twelveMonthsAgo = new Date(now.getFullYear()-1, now.getMonth(), 1);
+  const last12 = clients.filter(c => {
+    if(!c.date) return false;
+    const d = new Date(c.date+'T12:00:00');
+    return d >= twelveMonthsAgo && d <= now;
+  });
+  const monthMap = {};
+  last12.forEach(c => {
+    const d = new Date(c.date+'T12:00:00');
+    const key = `${d.getFullYear()}-${d.getMonth()}`;
+    monthMap[key] = (monthMap[key]||0) + c.total;
+  });
+  const activeMonths = Object.values(monthMap);
+  const avgMonthly   = activeMonths.length ? Math.round(activeMonths.reduce((s,v)=>s+v,0)/activeMonths.length) : 0;
+  const avgLabel     = activeMonths.length ? `Basado en ${activeMonths.length} mes${activeMonths.length!==1?'es':''} activo${activeMonths.length!==1?'s':''}` : 'Sin datos del último año';
+
+  document.getElementById('finance-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-value">${fmt(total)}</div><div class="stat-label">Total facturado</div></div>
+    <div class="stat-card"><div class="stat-value" style="color:var(--green)">${fmt(paid)}</div><div class="stat-label">Cobrado</div></div>
+    <div class="stat-card"><div class="stat-value" style="color:var(--gold)">${fmt(pending)}</div><div class="stat-label">Por cobrar</div></div>
+    <div class="stat-card"><div class="stat-value">${completed}</div><div class="stat-label">Contratos liquidados</div></div>
+    <div class="stat-card" style="grid-column:span 2;border-left:3px solid var(--gold)">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div class="stat-value" style="color:var(--gold)">${fmt(avgMonthly)}</div>
+          <div class="stat-label">Promedio mensual — último año</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:6px">${avgLabel}</div>
+        </div>
+        <div class="stat-icon" style="background:var(--gold-dim)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+      </div>
+    </div>`;
+
+  renderFinanzasSections();
+}
+
+function renderAreaChart() {
+  const wrap = document.getElementById('area-chart-wrap');
+  const yearRow = document.getElementById('chart-year-row');
+  if(!wrap || !yearRow) return;
+
+  // Build year list from all clients
+  const years = [...new Set(clients.map(c => c.date ? new Date(c.date+'T12:00:00').getFullYear() : null).filter(Boolean))].sort();
+  if(!years.includes(financeChartYear)) financeChartYear = years[years.length-1] || new Date().getFullYear();
+
+  yearRow.innerHTML = '<span class="chart-year-label">Año:</span>' +
+    years.map(y => `<button class="chart-year-btn${y===financeChartYear?' active':''}" onclick="financeChartYear=${y};renderAreaChart()">${y}</button>`).join('');
+
+  // Monthly totals for selected year
+  const months = Array.from({length:12}, (_,i) => {
+    const sum = clients.filter(c => {
+      if(!c.date) return false;
+      const d = new Date(c.date+'T12:00:00');
+      return d.getFullYear()===financeChartYear && d.getMonth()===i;
+    }).reduce((s,c)=>s+c.total,0);
+    return sum;
+  });
+
+  const maxVal = Math.max(...months, 1);
+  const W = 600, H = 160, padL = 52, padR = 16, padT = 16, padB = 28;
+  const cW = W - padL - padR, cH = H - padT - padB;
+  const mNames = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const pts = months.map((v,i) => [padL + (i/(11))*cW, padT + cH - (v/maxVal)*cH]);
+
+  // Build SVG path
+  const linePath = pts.map((p,i)=>(i===0?`M${p[0]},${p[1]}`:`L${p[0]},${p[1]}`)).join(' ');
+  const areaPath = linePath + ` L${pts[11][0]},${padT+cH} L${pts[0][0]},${padT+cH} Z`;
+
+  // Y axis labels
+  const yTicks = [0, 0.25, 0.5, 0.75, 1].map(f => ({
+    y: padT + cH - f*cH,
+    label: fmt(Math.round(f*maxVal))
+  }));
+
+  const nowM = new Date().getMonth();
+  const nowY = new Date().getFullYear();
+
+  wrap.innerHTML = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%">
+    <defs>
+      <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#c9a84c" stop-opacity="0.35"/>
+        <stop offset="100%" stop-color="#c9a84c" stop-opacity="0.02"/>
+      </linearGradient>
+    </defs>
+    ${yTicks.map(t=>`
+      <line x1="${padL}" y1="${t.y}" x2="${W-padR}" y2="${t.y}" stroke="var(--border)" stroke-dasharray="3,4" stroke-width="1"/>
+      <text x="${padL-6}" y="${t.y+4}" text-anchor="end" font-size="9" fill="var(--text-muted)" font-family="DM Sans,sans-serif">${t.label.replace('$','').replace(',000','k')}</text>`).join('')}
+    <path d="${areaPath}" fill="url(#areaGrad)"/>
+    <path d="${linePath}" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    ${pts.map((p,i)=>{
+      const isNow = financeChartYear===nowY && i===nowM;
+      const val = months[i];
+      return val>0 || isNow ? `
+        <circle cx="${p[0]}" cy="${p[1]}" r="${isNow?5:3.5}" fill="${isNow?'#c9a84c':'var(--surface)'}" stroke="#c9a84c" stroke-width="2"/>
+        ${val>0?`<text x="${p[0]}" y="${p[1]-9}" text-anchor="middle" font-size="9" fill="var(--text-muted)" font-family="DM Sans,sans-serif">${fmt(val).replace('$','').replace(',000','k')}</text>`:''}` : '';
+    }).join('')}
+    ${mNames.map((n,i)=>`<text x="${padL+(i/11)*cW}" y="${H-4}" text-anchor="middle" font-size="9" fill="${financeChartYear===nowY&&i===nowM?'#c9a84c':'var(--text-muted)'}" font-family="DM Sans,sans-serif" font-weight="${financeChartYear===nowY&&i===nowM?'600':'400'}">${n}</text>`).join('')}
+  </svg>`;
+}
+
+function renderFinanzasSections() {
+  const monthNames = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const fullMonths = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const now = new Date();
+
+  renderAreaChart();
+
+  // 6-month bar chart window
+  const monthData = Array.from({length:6}, (_,i) => {
+    const offset = i - 2;
+    let m = now.getMonth() + offset;
+    let y = now.getFullYear();
+    if(m < 0)  { m += 12; y--; }
+    if(m > 11) { m -= 12; y++; }
+    const base = getPeriodClients();
+    const sum = base.filter(c => {
+      if(!c.date) return false;
+      const d = new Date(c.date+'T12:00:00');
+      return d.getMonth()===m && d.getFullYear()===y;
+    }).reduce((s,c)=>s+c.total,0);
+    return { month:m, year:y, label:monthNames[m], fullLabel:`${fullMonths[m]} ${y}`, val:sum };
+  });
+
+  const maxVal = Math.max(...monthData.map(d=>d.val), 1);
+  document.getElementById('finance-chart').innerHTML = monthData.map(d => {
+    const h = Math.max(4, Math.round(d.val/maxVal*52));
+    const isActive = financeMonthFilter && financeMonthFilter.month===d.month && financeMonthFilter.year===d.year;
+    const isEmpty  = d.val===0;
+    return `<div class="bar-wrap${isActive?' selected':''}${isEmpty?' zero-bar':''}" onclick="${isEmpty?'':'selectFinanceBar('+d.month+','+d.year+',\''+d.fullLabel+'\')'}" title="">
+      <div class="bar-tooltip">${fmt(d.val)}</div>
+      <div class="bar" style="height:${h}px"></div>
+    </div>`;
+  }).join('');
+  document.getElementById('finance-months').innerHTML = monthData.map(d => {
+    const isActive = financeMonthFilter && financeMonthFilter.month===d.month && financeMonthFilter.year===d.year;
+    return `<div class="month-label${isActive?' selected':''}">${d.label}</div>`;
+  }).join('');
+
+  const badge   = document.getElementById('finance-filter-badge');
+  const clearBtn= document.getElementById('finance-clear-btn');
+  const titleEl = document.getElementById('all-payments-title');
+  if(financeMonthFilter) {
+    badge.style.display='flex';
+    document.getElementById('finance-filter-label').textContent=`📅 ${financeMonthFilter.label}`;
+    clearBtn.style.display='block';
+    titleEl.textContent=`Pagos — ${financeMonthFilter.label}`;
+  } else {
+    badge.style.display='none';
+    clearBtn.style.display='none';
+    titleEl.textContent='Todos los pagos';
+  }
+
+  const filtered = getFinanceClients();
+  const types     = ['boda','xv','graduacion','bautizo','corporativo','sesion','otros'];
+  const typeNames = {boda:'Bodas',xv:'XV Años',graduacion:'Graduación',bautizo:'Bautizo',corporativo:'Corporativo',sesion:'Sesión',otros:'Otros'};
+  const typeColors= {boda:'#e0a05a',xv:'#c05ae0',graduacion:'#5ae0c0',bautizo:'#5ab0e0',corporativo:'var(--blue)',sesion:'#c9a84c',otros:'#7a7570'};
+  const activeTypes = types.filter(t=>filtered.some(c=>c.type===t));
+  document.getElementById('event-type-dist').innerHTML = activeTypes.length===0
+    ? '<div style="color:var(--text-muted);font-size:13px;padding:8px 0">Sin eventos en este período</div>'
+    : activeTypes.map(t=>{
+        const count   = filtered.filter(c=>c.type===t).length;
+        const revenue = filtered.filter(c=>c.type===t).reduce((s,c)=>s+c.total,0);
+        const pct     = filtered.length ? Math.round(count/filtered.length*100) : 0;
+        return `<div style="margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+            <span>${typeNames[t]}</span>
+            <span style="color:var(--text-muted)">${count} evento${count!==1?'s':''} · ${fmt(revenue)}</span>
+          </div>
+          <div class="progress-bar-wrap"><div class="progress-bar" style="width:${pct}%;background:${typeColors[t]}"></div></div>
+        </div>`;
+      }).join('');
+
+  const sorted = [...filtered].sort((a,b)=>new Date(a.date)-new Date(b.date));
+  document.getElementById('all-payments').innerHTML = sorted.length===0
+    ? '<div style="color:var(--text-muted);font-size:13px;padding:12px 0;text-align:center">Sin pagos en este período</div>'
+    : sorted.map(c=>{
+        const balance=c.total-c.paid;
+        const bdg=balance===0?'<span class="badge badge-paid">Liquidado</span>':daysLeft(c.date)<15?'<span class="badge badge-overdue">Urgente</span>':'<span class="badge badge-pending">Pendiente</span>';
+        return `<div class="payment-row" onclick="showClientDetail(${c.id})" style="cursor:pointer">
+          <div><div class="payment-client">${c.name}</div><div class="payment-event">${typeLabel(c.type)} · ${fmtDate(c.date)}</div></div>
+          <div style="text-align:right">
+            <div class="payment-amount ${balance===0?'paid':'pending'}">${fmt(c.total)}</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px">${bdg}</div>
+          </div>
+        </div>`;
+      }).join('');
 }
 
 function getFinanceClients() {
