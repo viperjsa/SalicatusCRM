@@ -3693,7 +3693,7 @@ async function authLogin() {
   btn.textContent = 'Verificando…'; btn.disabled = true;
   try {
     // Use the email tied to this account in Supabase Auth
-    await sbSignIn('salicatus@salicatus.com', pwd);
+    await sbSignIn('salicatus@outlook.com', pwd);
     // Load data with the new JWT
     await sbLoadAll();
     renderAll();
@@ -3743,7 +3743,7 @@ async function authChangePwd() {
   if(newPwd.length < 6) { showLoginError('Mínimo 6 caracteres'); return; }
   try {
     // Re-authenticate with old password to verify
-    await sbSignIn('salicatus@salicatus.com', oldPwd);
+    await sbSignIn('salicatus@outlook.com', oldPwd);
   } catch(e) {
     showLoginError('La contraseña actual es incorrecta'); return;
   }
