@@ -872,50 +872,6 @@
   </div>
 </div>
 
-<!-- MOBILE MENU MODAL -->
-<div class="mobile-menu-modal" id="mobile-menu-modal" onclick="handleMenuOverlayClick(event)">
-  <div class="mobile-menu-panel" id="mobile-menu-panel">
-    <div class="mobile-menu-header">
-      <span style="font-size:13px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase">Menú</span>
-      <button class="mobile-menu-close" onclick="closeMenu()">✕</button>
-    </div>
-    <div class="mobile-menu-nav">
-      <div class="mobile-menu-section">Principal</div>
-      <button class="mobile-menu-item active" id="menu-dashboard" onclick="menuNav('dashboard')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-        Dashboard
-      </button>
-      <button class="mobile-menu-item" id="menu-clientes" onclick="menuNav('clientes')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="7" r="4"/><path d="M2 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0-3-3.87"/></svg>
-        Clientes
-      </button>
-      <button class="mobile-menu-item" id="menu-finanzas" onclick="menuNav('finanzas')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 1 0 0 7h5a3.5 3.5 0 1 1 0 7H6"/></svg>
-        Finanzas
-      </button>
-      <div class="mobile-menu-section">Config</div>
-      <button class="mobile-menu-item" id="menu-paquetes" onclick="menuNav('paquetes')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
-        Paquetes
-      </button>
-      <button class="mobile-menu-item" id="menu-catalogo" onclick="menuNav('catalogo')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-        Catálogo
-      </button>
-      <button class="mobile-menu-item" id="menu-notas" onclick="menuNav('notas')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-        Notas
-      </button>
-    </div>
-    <div class="mobile-menu-footer">
-      <button onclick="authLogout()" style="display:flex;align-items:center;gap:8px;background:none;border:1px solid var(--border);border-radius:8px;padding:11px 14px;color:var(--text-muted);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;width:100%">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        Cerrar sesión
-      </button>
-    </div>
-  </div>
-</div>
-
 <!-- MOBILE BOTTOM NAV (visible only on mobile) -->
 <nav class="mobile-nav" id="mobile-nav">
   <button class="mobile-nav-item active" id="mnav-dashboard" onclick="mobileNav('dashboard')">
