@@ -2904,15 +2904,6 @@ function renderFinanzasSections() {
       }).join('');
 }
 
-function getFinanceClients() {
-  if(!financeMonthFilter) return clients;
-  return clients.filter(c => {
-    if(!c.date) return false;
-    const d = new Date(c.date + 'T12:00:00');
-    return d.getMonth() === financeMonthFilter.month && d.getFullYear() === financeMonthFilter.year;
-  });
-}
-
 // ───── PAQUETES ─────
 function renderPaquetes() {
   // sync packages object for client detail lookups
