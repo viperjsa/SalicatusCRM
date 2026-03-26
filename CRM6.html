@@ -1129,12 +1129,12 @@
         <div class="page-subtitle">Resumen de ingresos y pagos</div>
       </div>
     </div>
-    <!-- PERIOD FILTER BAR -->
+<!-- PERIOD FILTER BAR -->
     <div class="finance-period-bar" id="finance-period-bar">
-      <button class="period-chip active" id="pchip-month"  onclick="setPeriod('month')">Este mes</button>
+      <button class="period-chip active" id="pchip-month"   onclick="setPeriod('month')">Este mes</button>
       <button class="period-chip"        id="pchip-quarter" onclick="setPeriod('quarter')">Trimestre</button>
-      <button class="period-chip"        id="pchip-year"   onclick="setPeriod('year')">Este año</button>
-      <button class="period-chip"        id="pchip-all"    onclick="setPeriod('all')">Todo</button>
+      <button class="period-chip"        id="pchip-year"    onclick="setPeriod('year')">Este año</button>
+      <button class="period-chip"        id="pchip-all"     onclick="setPeriod('all')">Todo</button>
       <div class="period-separator"></div>
       <span style="font-size:12px;color:var(--text-muted);white-space:nowrap">Personalizado:</span>
       <input type="date" class="period-date-input" id="period-from" onchange="setPeriod('custom')">
@@ -1143,39 +1143,26 @@
       <button class="period-clear-btn" onclick="setPeriod('all')">✕ Limpiar filtros</button>
     </div>
 
+    <!-- STAT CARDS -->
     <div class="stats-grid" id="finance-stats"></div>
-    <div class="finance-grid">
-      <div class="card" style="grid-column:span 2;max-width:720px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;flex-wrap:wrap;gap:8px">
-          <div class="card-title" style="margin-bottom:0">Estadística de ingresos</div>
-          <div id="finance-filter-badge" style="display:none;align-items:center;gap:8px">
-            <span id="finance-filter-label" style="font-size:11px;color:var(--gold);background:var(--gold-dim);padding:3px 10px;border-radius:20px"></span>
-            <button onclick="clearFinanceBarFilter()" style="font-size:11px;color:var(--text-muted);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;padding:0" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text-muted)'">✕ Ver todos</button>
-          </div>
-        </div>
-        <!-- Year selector for bar chart -->
-        <div class="area-chart-year-row" id="chart-year-row"></div>
-        <!-- Area chart -->
-        <div class="area-chart-wrap" id="area-chart-wrap"></div>
-        <!-- Original mini bar chart -->
-        <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
-          <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:1.5px">Detalle mensual (clic para filtrar)</div>
-          <div class="mini-chart" id="finance-chart"></div>
-          <div class="months-labels" id="finance-months"></div>
+
+    <!-- CARD 1: Gráfica anual (independiente, ancho completo) -->
+    <div class="card" style="margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;flex-wrap:wrap;gap:8px">
+        <div class="card-title" style="margin-bottom:0;text-transform:uppercase;letter-spacing:1.5px;font-size:11px;font-family:'DM Sans',sans-serif;color:var(--text-muted)">Estadística de ingresos</div>
+        <div id="finance-filter-badge" style="display:none;align-items:center;gap:8px">
+          <span id="finance-filter-label" style="font-size:11px;color:var(--gold);background:var(--gold-dim);padding:3px 10px;border-radius:20px"></span>
+          <button onclick="clearFinanceBarFilter()" style="font-size:11px;color:var(--text-muted);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;padding:0" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text-muted)'">✕ Ver todos</button>
         </div>
       </div>
+      <div class="area-chart-year-row" id="chart-year-row"></div>
+      <div class="area-chart-wrap" id="area-chart-wrap"></div>
     </div>
-    <div class="finance-grid" style="margin-top:16px">
-    </div>
-    <div style="margin-top:16px" class="card">
+
+    <!-- CARD 2: Detalle mensual + Distribución (dos columnas) -->
+    <div class="finance-grid" style="margin-bottom:16px">
       <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-          <div class="card-title" style="margin-bottom:0">Ingresos por mes</div>
-          <div id="finance-filter-badge" style="display:none;align-items:center;gap:8px">
-            <span id="finance-filter-label" style="font-size:11px;color:var(--gold);background:var(--gold-dim);padding:3px 10px;border-radius:20px"></span>
-            <button onclick="clearFinanceFilter()" style="font-size:11px;color:var(--text-muted);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;padding:0;transition:color 0.15s" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text-muted)'">✕ Ver todos</button>
-          </div>
-        </div>
+        <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px">Detalle mensual <span style="font-size:10px">(clic para filtrar)</span></div>
         <div class="mini-chart" id="finance-chart"></div>
         <div class="months-labels" id="finance-months"></div>
       </div>
@@ -1184,14 +1171,19 @@
         <div id="event-type-dist"></div>
       </div>
     </div>
-    <div style="margin-top:20px" class="card">
+
+    <!-- CARD 3: Todos los pagos -->
+    <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
         <div class="card-title" style="margin-bottom:0" id="all-payments-title">Todos los pagos</div>
         <button id="finance-clear-btn" onclick="clearFinanceFilter()" style="display:none;font-size:12px;color:var(--text-muted);background:none;border:1px solid var(--border);border-radius:8px;padding:5px 12px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s" onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'">✕ Limpiar filtro</button>
       </div>
       <div id="all-payments"></div>
     </div>
+
   </div>
+
+  <!-- PAQUETES -->
 
   <!-- PAQUETES -->
   <div class="page" id="page-paquetes">
