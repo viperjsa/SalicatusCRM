@@ -1129,6 +1129,20 @@
         <div class="page-subtitle">Resumen de ingresos y pagos</div>
       </div>
     </div>
+
+    <!-- CARD 1: Gráfica anual (independiente, ancho completo) -->
+    <div class="card" style="margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;flex-wrap:wrap;gap:8px">
+        <div class="card-title" style="margin-bottom:0;text-transform:uppercase;letter-spacing:1.5px;font-size:11px;font-family:'DM Sans',sans-serif;color:var(--text-muted)">Estadística de ingresos</div>
+        <div id="finance-filter-badge" style="display:none;align-items:center;gap:8px">
+          <span id="finance-filter-label" style="font-size:11px;color:var(--gold);background:var(--gold-dim);padding:3px 10px;border-radius:20px"></span>
+          <button onclick="clearFinanceBarFilter()" style="font-size:11px;color:var(--text-muted);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;padding:0" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text-muted)'">✕ Ver todos</button>
+        </div>
+      </div>
+      <div class="area-chart-year-row" id="chart-year-row"></div>
+      <div class="area-chart-wrap" id="area-chart-wrap"></div>
+    </div>
+    
 <!-- PERIOD FILTER BAR -->
     <div class="finance-period-bar" id="finance-period-bar">
       <button class="period-chip active" id="pchip-month"   onclick="setPeriod('month')">Este mes</button>
@@ -1145,19 +1159,6 @@
 
     <!-- STAT CARDS -->
     <div class="stats-grid" id="finance-stats"></div>
-
-    <!-- CARD 1: Gráfica anual (independiente, ancho completo) -->
-    <div class="card" style="margin-bottom:16px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;flex-wrap:wrap;gap:8px">
-        <div class="card-title" style="margin-bottom:0;text-transform:uppercase;letter-spacing:1.5px;font-size:11px;font-family:'DM Sans',sans-serif;color:var(--text-muted)">Estadística de ingresos</div>
-        <div id="finance-filter-badge" style="display:none;align-items:center;gap:8px">
-          <span id="finance-filter-label" style="font-size:11px;color:var(--gold);background:var(--gold-dim);padding:3px 10px;border-radius:20px"></span>
-          <button onclick="clearFinanceBarFilter()" style="font-size:11px;color:var(--text-muted);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;padding:0" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text-muted)'">✕ Ver todos</button>
-        </div>
-      </div>
-      <div class="area-chart-year-row" id="chart-year-row"></div>
-      <div class="area-chart-wrap" id="area-chart-wrap"></div>
-    </div>
 
     <!-- CARD 2: Detalle mensual + Distribución (dos columnas) -->
     <div class="finance-grid" style="margin-bottom:16px">
