@@ -1964,7 +1964,7 @@ function showPage(name, btn) {
   if(btn) btn.classList.add('active');
   if(name==='dashboard') { renderDashboard(); renderCalendar(); }
   if(name==='clientes') { populateYearFilter(); renderClients(); }
-  if(name==='finanzas') { financePeriod={type:'month',from:getPeriodRange('month').from,to:getPeriodRange('month').to}; financeMonthFilter=null; renderFinanzas(); }
+  if(name==='finanzas') { const r=getPeriodRange(financePeriod.type||'month'); financePeriod={...financePeriod,from:r?.from||null,to:r?.to||null}; financeMonthFilter=null; renderFinanzas(); }
   if(name==='paquetes') renderPaquetes();
   if(name==='catalogo') renderCatalog();
   if(name==='notas')    renderNotes();
@@ -2626,7 +2626,7 @@ function deleteClient(id) {
 
 // ───── FINANZAS ─────
 let financeMonthFilter = null;
-let financePeriod = { type: 'month', from: null, to: null }; // active period filter
+let financePeriod = (()=>{ const r=getPeriodRange('month'); return {type:'month',from:r.from,to:r.to}; })(); // active period filter
 let financeChartYear = new Date().getFullYear();             // year shown in area chart
 
 // ── Period helpers ──
