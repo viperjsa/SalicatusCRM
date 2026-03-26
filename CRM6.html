@@ -213,7 +213,7 @@
   .area-chart-wrap {
     width:100%; overflow-x:auto; margin-top:8px;
   }
-  .area-chart-wrap svg { display:block; width:100%; min-width:280px; }
+  .area-chart-wrap svg { display:block; width:100%; min-width:280px; max-width:100%; }
   .area-chart-year-row {
     display:flex; align-items:center; gap:8px; margin-bottom:10px; flex-wrap:wrap;
   }
@@ -1145,7 +1145,7 @@
 
     <div class="stats-grid" id="finance-stats"></div>
     <div class="finance-grid">
-      <div class="card" style="grid-column:span 2">
+      <div class="card" style="grid-column:span 2;max-width:720px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;flex-wrap:wrap;gap:8px">
           <div class="card-title" style="margin-bottom:0">Estadística de ingresos</div>
           <div id="finance-filter-badge" style="display:none;align-items:center;gap:8px">
@@ -2903,8 +2903,9 @@ function renderFinanzasSections() {
         return `<div class="payment-row" onclick="showClientDetail(${c.id})" style="cursor:pointer">
           <div><div class="payment-client">${c.name}</div><div class="payment-event">${typeLabel(c.type)} · ${fmtDate(c.date)}</div></div>
           <div style="text-align:right">
-            <div class="payment-amount ${balance===0?'paid':'pending'}">${fmt(c.total)}</div>
-            <div style="font-size:11px;color:var(--text-muted);margin-top:2px">${bdg}</div>
+            <div style="font-size:13px;color:var(--green);font-weight:500">${fmt(c.paid)} <span style="color:var(--text-muted);font-weight:400;font-size:11px">/ ${fmt(c.total)}</span></div>
+            ${balance>0?`<div style="font-size:11px;color:var(--gold);margin-top:1px">Saldo: ${fmt(balance)}</div>`:''}
+            <div style="margin-top:3px">${bdg}</div>
           </div>
         </div>`;
       }).join('');
