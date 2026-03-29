@@ -2,7 +2,7 @@
   "name": "Salicatus — Gestión Fotográfica",
   "short_name": "Salicatus",
   "description": "Gestión de clientes para fotografía de eventos",
-  "start_url": "./CRM6.html",
+  "start_url": "./CRM6ver10.html",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#0d0d0d",
