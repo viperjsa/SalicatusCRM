@@ -999,7 +999,7 @@
       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       Cerrar sesión
     </button>
-    <div style="margin-top:14px;padding-top:10px;border-top:1px solid var(--border);font-size:9px;color:var(--border);letter-spacing:1px;text-align:center">SALICATUS CRM v1.0</div>
+    <div style="margin-top:14px;padding-top:10px;border-top:1px solid var(--border);font-size:9px;color:var(--border);letter-spacing:1px;text-align:center">SALICATUS CRM v1.1</div>
   </div>
 </nav>
 
@@ -1092,6 +1092,16 @@
       <button class="chip" onclick="setFilter('corporativo',this)">🏢 Corporativo</button>
       <button class="chip" onclick="setFilter('sesion',this)">📸 Sesión</button>
       <button class="chip" onclick="setFilter('otros',this)">✨ Otros</button>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div id="completed-count-label" style="font-size:12px;color:var(--text-muted)"></div>
+      <button id="toggle-completed-btn" onclick="toggleShowCompleted()"
+        style="display:flex;align-items:center;gap:6px;background:none;border:1px solid var(--border);border-radius:20px;padding:5px 14px;color:var(--text-muted);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s"
+        onmouseover="this.style.borderColor='var(--green)';this.style.color='var(--green)'"
+        onmouseout="if(!showCompleted){this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'}">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        <span id="toggle-completed-label">Ver completados</span>
+      </button>
     </div>
     <div class="card" style="padding:0;overflow:hidden">
       <table class="clients-table">
@@ -1948,6 +1958,7 @@ let notes        = [];
 let catalog      = [];
 let catalogNextId = 500;
 let currentFilter = 'todos';
+let showCompleted = false;
 let currentSearch = '';
 let editingId = null;
 let currentDateFilter = { month: '', year: '' };
@@ -2103,6 +2114,8 @@ function ppChangePage(delta) {
 // ───── CLIENTS ─────
 function getFilteredClients() {
   return clients.filter(c => {
+    const isCompleted = c.paid >= c.total;
+    if(!showCompleted && isCompleted) return false;
     const matchType = currentFilter==='todos' || c.type===currentFilter;
     const q = currentSearch.toLowerCase();
     const matchSearch = !q || c.name.toLowerCase().includes(q) || c.type.includes(q) || c.package.toLowerCase().includes(q) || (c.venue||'').toLowerCase().includes(q);
@@ -2118,9 +2131,31 @@ function getFilteredClients() {
   });
 }
 
+function toggleShowCompleted() {
+  showCompleted = !showCompleted;
+  const btn   = document.getElementById('toggle-completed-btn');
+  const label = document.getElementById('toggle-completed-label');
+  if(showCompleted) {
+    label.textContent = 'Ocultar completados';
+    btn.style.borderColor = 'var(--green)';
+    btn.style.color       = 'var(--green)';
+    btn.style.background  = 'rgba(76,175,125,0.08)';
+  } else {
+    label.textContent = 'Ver completados';
+    btn.style.borderColor = '';
+    btn.style.color       = '';
+    btn.style.background  = '';
+  }
+  renderClients();
+}
+
 function renderClients() {
   const filtered = getSortedClients(getFilteredClients());
+  const completedTotal = clients.filter(c=>c.paid>=c.total).length;
+  const activeTotal    = clients.filter(c=>c.paid<c.total).length;
   document.getElementById('clients-count-label').textContent = `${filtered.length} cliente${filtered.length!==1?'s':''} encontrado${filtered.length!==1?'s':''}`;
+  const ccLabel = document.getElementById('completed-count-label');
+  if(ccLabel) ccLabel.textContent = `${activeTotal} activo${activeTotal!==1?'s':''} · ${completedTotal} completado${completedTotal!==1?'s':''}`;
   const tbody = document.getElementById('clients-tbody');
   if(filtered.length===0) {
     tbody.innerHTML = '<tr><td colspan="9"><div class="empty-state"><div class="empty-state-icon">🔍</div><div class="empty-state-text">Sin resultados</div></div></td></tr>';
