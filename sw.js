@@ -1,6 +1,6 @@
 const CACHE = 'salicatus-v1';
 const ASSETS = [
-  './photo_crm.html',
+  './CRM6Ver10.html.html',
   'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap',
   'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
 ];
