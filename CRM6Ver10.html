@@ -2114,7 +2114,7 @@ function ppChangePage(delta) {
 // ───── CLIENTS ─────
 function getFilteredClients() {
   return clients.filter(c => {
-    const isCompleted = c.paid >= c.total;
+    const isCompleted = c.total > 0 && c.paid >= c.total;
     if(!showCompleted && isCompleted) return false;
     const matchType = currentFilter==='todos' || c.type===currentFilter;
     const q = currentSearch.toLowerCase();
@@ -3144,8 +3144,8 @@ function saveClient() {
   }
   closeModal();
   lsSave();
-  if(document.getElementById('page-clientes').classList.contains('active')) renderClients();
-  if(document.getElementById('page-dashboard').classList.contains('active')) renderDashboard();
+  renderClients();
+  if(document.getElementById('page-dashboard').classList.contains('active')) { renderDashboard(); renderCalendar(); }
 }
 
 // ───── PAYMENTS ─────
