@@ -999,7 +999,7 @@
       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       Cerrar sesión
     </button>
-    <div style="margin-top:14px;padding-top:10px;border-top:1px solid var(--border);font-size:9px;color:var(--border);letter-spacing:1px;text-align:center">SALICATUS CRM v1.1</div>
+    <div style="margin-top:14px;padding-top:10px;border-top:1px solid var(--border);font-size:9px;color:var(--border);letter-spacing:1px;text-align:center">SALICATUS CRM v2</div>
   </div>
 </nav>
 
@@ -1694,13 +1694,14 @@ const supabaseConfigured = SUPABASE_URL !== 'TU_SUPABASE_URL';
 // JWT access token — set after login, used for ALL data requests
 let _accessToken = null;
 
-function sbAuthHeaders() {
-  return {
+function sbAuthHeaders(write = false) {
+  const h = {
     'Content-Type': 'application/json',
     'apikey': SUPABASE_KEY,
     'Authorization': `Bearer ${_accessToken || SUPABASE_KEY}`,
-    'Prefer': 'resolution=merge-duplicates'
   };
+  if(write) h['Prefer'] = 'return=minimal,resolution=merge-duplicates';
+  return h;
 }
 
 // ── Supabase Auth ──
@@ -1784,12 +1785,24 @@ async function sbGet(key) {
 async function sbSet(key, value) {
   if(!supabaseConfigured || !_accessToken) return;
   try {
-    await fetch(`${SUPABASE_URL}/rest/v1/app_data`, {
-      method: 'POST',
-      headers: sbAuthHeaders(),
-      body: JSON.stringify({ key, value })
-    });
-  } catch(e) { console.warn('Supabase write error:', e); }
+    // PATCH con upsert explícito — más confiable que POST para actualizar
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/app_data?key=eq.${encodeURIComponent(key)}`,
+      {
+        method: 'PATCH',
+        headers: sbAuthHeaders(true),
+        body: JSON.stringify({ value })
+      }
+    );
+    // Si no existe aún la fila, insertar
+    if(res.status === 404 || res.status === 0) {
+      await fetch(`${SUPABASE_URL}/rest/v1/app_data`, {
+        method: 'POST',
+        headers: sbAuthHeaders(true),
+        body: JSON.stringify({ key, value })
+      });
+    }
+  } catch(e) { console.warn('sbSet error:', e); }
 }
 
 // ───── PERSISTENCIA ─────
