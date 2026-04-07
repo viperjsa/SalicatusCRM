@@ -1826,18 +1826,23 @@ function migrateClients(arr) {
 }
 
 // lsSave — solo escribe a Supabase, no a localStorage
-function lsSave() {
+async function lsSave() {
   if(supabaseConfigured && _accessToken) {
     setSyncStatus('syncing');
     const meta = { nextId, pkgNextId, catalogNextId };
-    Promise.all([
-      sbSet('clients',       clients),
-      sbSet('packages',      packagesData),
-      sbSet('custom_addons', customAddons),
-      sbSet('notes',         notes),
-      sbSet('catalog',       catalog),
-      sbSet('meta',          meta),
-    ]).then(() => setSyncStatus('ok')).catch(() => setSyncStatus('error'));
+    try {
+      await Promise.all([
+        sbSet('clients',       clients),
+        sbSet('packages',      packagesData),
+        sbSet('custom_addons', customAddons),
+        sbSet('notes',         notes),
+        sbSet('catalog',       catalog),
+        sbSet('meta',          meta),
+      ]);
+      setSyncStatus('ok');
+    } catch(e) {
+      setSyncStatus('error');
+    }
   }
   updateSaveIndicator();
 }
@@ -3056,7 +3061,7 @@ function editClient(id) {
   document.getElementById('modal-overlay').classList.add('open');
 }
 function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
-function saveClient() {
+async function saveClient() {
   const name=document.getElementById('f-name').value.trim();
   if(!name){ alert('Ingresa el nombre del cliente'); return; }
   const addons=[...document.querySelectorAll('#addons-checkbox-group input:checked')].map(cb=>cb.value);
@@ -3100,9 +3105,10 @@ function saveClient() {
     toast('Cliente agregado ✓');
   }
   closeModal();
-  lsSave();
+  await lsSave();
   renderClients();
   if(document.getElementById('page-dashboard').classList.contains('active')) { renderDashboard(); renderCalendar(); }
+  }
 }
 
 // ───── PAYMENTS ─────
