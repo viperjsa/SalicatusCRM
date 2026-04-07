@@ -27,7 +27,10 @@ self.addEventListener('fetch', e => {
 
   if(e.request.method !== 'GET') return;
 
-  // Network-first for the main app file, sw and manifest
+  // Nunca cachear llamadas a Supabase — siempre van a la red
+  if(url.includes('supabase.co')) return;
+
+  // Network-first para el HTML principal
   if(url.includes('CRM6Ver10.html') || url.includes('sw.js') || url.includes('manifest.json')) {
     e.respondWith(
       fetch(e.request)
@@ -41,7 +44,7 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // Cache-first for static assets (fonts, icons, CDN)
+  // Cache-first para fuentes e íconos
   e.respondWith(
     caches.match(e.request).then(cached => {
       if(cached) return cached;
