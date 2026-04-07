@@ -1825,44 +1825,8 @@ function migrateClients(arr) {
   return arr;
 }
 
-// Start with EMPTY data — never show cached data before auth
-function initEmptyData() {
-  clients      = [];
-  packagesData = DEFAULT_PACKAGES;
-  nextId       = 7;
-  pkgNextId    = 10;
-  customAddons = [];
-  notes        = [];
-  catalog      = [];
-}
-
-// Load from localStorage (only called after successful auth as warm cache)
-function lsLoadCache() {
-  try {
-    const c = JSON.parse(localStorage.getItem(LS_CLIENTS));
-    if(c && c.length) { clients = migrateClients(c); }
-    const p = JSON.parse(localStorage.getItem(LS_PACKAGES));
-    if(p && p.length) packagesData = p;
-    nextId       = JSON.parse(localStorage.getItem(LS_NEXTID))    || nextId;
-    pkgNextId    = JSON.parse(localStorage.getItem(LS_PKGNEXTID)) || pkgNextId;
-    customAddons = JSON.parse(localStorage.getItem(LS_ADDONS))    || [];
-    notes        = JSON.parse(localStorage.getItem(LS_NOTES))     || [];
-    catalog      = JSON.parse(localStorage.getItem(LS_CATALOG))   || [];
-  } catch(e) {}
-}
-
-// Save to localStorage + push to Supabase (async, non-blocking)
+// lsSave — solo escribe a Supabase, no a localStorage
 function lsSave() {
-  try {
-    localStorage.setItem(LS_CLIENTS,   JSON.stringify(clients));
-    localStorage.setItem(LS_PACKAGES,  JSON.stringify(packagesData));
-    localStorage.setItem(LS_NEXTID,    JSON.stringify(nextId));
-    localStorage.setItem(LS_PKGNEXTID, JSON.stringify(pkgNextId));
-    localStorage.setItem(LS_ADDONS,    JSON.stringify(customAddons));
-    localStorage.setItem(LS_NOTES,     JSON.stringify(notes));
-    localStorage.setItem(LS_CATALOG,   JSON.stringify(catalog));
-  } catch(e) {}
-
   if(supabaseConfigured && _accessToken) {
     setSyncStatus('syncing');
     const meta = { nextId, pkgNextId, catalogNextId };
@@ -1875,7 +1839,6 @@ function lsSave() {
       sbSet('meta',          meta),
     ]).then(() => setSyncStatus('ok')).catch(() => setSyncStatus('error'));
   }
-
   updateSaveIndicator();
 }
 
@@ -1891,17 +1854,11 @@ async function sbLoadAll() {
     const byKey = {};
     rows.forEach(r => byKey[r.key] = r.value);
 
-    if(byKey.clients && byKey.clients.length > 0) {
-      clients = migrateClients(byKey.clients);
-      localStorage.setItem(LS_CLIENTS, JSON.stringify(clients));
-    }
-    if(byKey.packages && byKey.packages.length > 0) {
-      packagesData = byKey.packages;
-      localStorage.setItem(LS_PACKAGES, JSON.stringify(packagesData));
-    }
-    if(byKey.custom_addons && byKey.custom_addons.length > 0) { customAddons = byKey.custom_addons; localStorage.setItem(LS_ADDONS, JSON.stringify(customAddons)); }
-    if(byKey.notes && byKey.notes.length > 0)         { notes   = byKey.notes;   localStorage.setItem(LS_NOTES,   JSON.stringify(notes)); }
-    if(byKey.catalog && byKey.catalog.length > 0)     { catalog = byKey.catalog; localStorage.setItem(LS_CATALOG, JSON.stringify(catalog)); }
+    if(byKey.clients && byKey.clients.length > 0)         clients      = migrateClients(byKey.clients);
+    if(byKey.packages && byKey.packages.length > 0)       packagesData = byKey.packages;
+    if(byKey.custom_addons && byKey.custom_addons.length > 0) customAddons = byKey.custom_addons;
+    if(byKey.notes && byKey.notes.length > 0)             notes        = byKey.notes;
+    if(byKey.catalog && byKey.catalog.length > 0)         catalog      = byKey.catalog;
     if(byKey.meta) {
       nextId        = byKey.meta.nextId        || nextId;
       pkgNextId     = byKey.meta.pkgNextId     || pkgNextId;
@@ -3146,7 +3103,6 @@ function saveClient() {
   lsSave();
   renderClients();
   if(document.getElementById('page-dashboard').classList.contains('active')) { renderDashboard(); renderCalendar(); }
-}
 
 // ───── PAYMENTS ─────
 let _paymentIdCounter = 1000;
@@ -3504,15 +3460,13 @@ document.getElementById('modal-overlay').addEventListener('click',function(e){ i
 document.getElementById('pkg-modal-overlay').addEventListener('click',function(e){ if(e.target===this) closePkgModal(); });
 
 function resetData() {
-  showConfirm('¿Restablecer todos los datos?', 'Se borrarán todos tus clientes y paquetes y se volverá a los datos de ejemplo. Esta acción no se puede deshacer.', 'Restablecer').then(ok => {
+  showConfirm('¿Restablecer todos los datos?', 'Se borrarán todos tus clientes y paquetes en Supabase. Esta acción no se puede deshacer.', 'Restablecer').then(ok => {
     if(!ok) return;
-    localStorage.removeItem(LS_CLIENTS);
-    localStorage.removeItem(LS_PACKAGES);
-    localStorage.removeItem(LS_NEXTID);
-    localStorage.removeItem(LS_PKGNEXTID);
-    localStorage.removeItem(LS_ADDONS);
-    localStorage.removeItem(LS_NOTES);
-    location.reload();
+    clients = DEFAULT_CLIENTS; packagesData = DEFAULT_PACKAGES;
+    customAddons = []; notes = []; catalog = []; nextId = 7; pkgNextId = 10;
+    lsSave();
+    renderAll();
+    toast('Datos restablecidos ✓');
   });
 }
 
@@ -3566,8 +3520,7 @@ function importBackup(event) {
         nextId       = data.nextId       || (clients.length ? Math.max(...clients.map(c=>c.id)) + 1 : 1);
         pkgNextId    = data.pkgNextId    || 10;
         lsSave();
-        renderPaquetes();
-        renderDashboard();
+        renderAll();
         populateYearFilter();
         toast(`✅ Respaldo importado — ${clients.length} clientes restaurados`);
       });
@@ -4095,11 +4048,9 @@ async function authLogin() {
 
 async function authLogout() {
   await sbSignOut();
-  // Clear cached data from localStorage on logout
-  [LS_CLIENTS,LS_PACKAGES,LS_NEXTID,LS_PKGNEXTID,LS_ADDONS,LS_NOTES,LS_CATALOG].forEach(k=>localStorage.removeItem(k));
+  // Solo borra la sesión — los datos ya no están en localStorage
   location.reload();
 }
-
 function showChangePassword() {
   document.getElementById('login-title').textContent = 'Cambiar contraseña';
   document.getElementById('login-sub').textContent   = 'Ingresa tu contraseña actual y la nueva';
@@ -4159,33 +4110,32 @@ function renderAll() {
   const loadingText = document.getElementById('loading-text');
 
   if(!supabaseConfigured) {
-    // Dev/local mode — load from localStorage and skip auth
-    lsLoadCache();
     renderAll();
-    loadingText.textContent = 'Modo local';
+    loadingText.textContent = 'Modo local (sin nube)';
     document.getElementById('sync-status').textContent = '⚠ Sin nube configurada';
     overlay.style.opacity = '0';
     setTimeout(() => overlay.style.display = 'none', 400);
     return;
   }
 
-  // 1 — Try to restore existing session
+  // 1 — Verificar sesión existente
   loadingText.textContent = 'Verificando sesión…';
   const hasSession = await sbRestoreSession();
 
   if(hasSession) {
-    // 2a — Valid session: load cached data instantly, then sync from cloud
+    // 2 — Cargar datos frescos de Supabase (siempre, sin caché local)
     loadingText.textContent = 'Cargando datos…';
-    lsLoadCache();
-    renderAll();
+    const fromCloud = await sbLoadAll();
+    if(fromCloud) {
+      renderAll();
+      setSyncStatus('ok');
+    } else {
+      renderAll(); // renderiza vacío si falla Supabase
+      setSyncStatus('error');
+    }
     overlay.style.opacity = '0';
     setTimeout(() => overlay.style.display = 'none', 400);
-    // Sync fresh data in background
-    const fromCloud = await sbLoadAll();
-    if(fromCloud) { renderAll(); setSyncStatus('ok'); }
-    else setSyncStatus('error');
   } else {
-    // 2b — No valid session: show login (dashboard stays empty)
     overlay.style.opacity = '0';
     setTimeout(() => { overlay.style.display = 'none'; showLoginScreen(); }, 400);
   }
