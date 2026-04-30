@@ -3126,7 +3126,16 @@ async function saveClient() {
   }
 
 // ───── PAYMENTS ─────
-let _paymentIdCounter = 1000;
+let _paymentIdCounter = (() => {
+  let max = 1000;
+  (typeof clients !== 'undefined' ? clients : []).forEach(c => {
+    (c.payments || []).forEach(p => {
+      const n = parseInt((p.id || '').replace(/\D/g, ''));
+      if(!isNaN(n) && n >= max) max = n + 1;
+    });
+  });
+  return max;
+})();
 
 function recalcPaid(client) {
   client.paid = (client.payments || []).reduce((s, p) => s + p.amount, 0);
